@@ -43,7 +43,10 @@ const App = () => {
     const web3 = new Web3(Web3.givenProvider || "http://localhost:7545")
     const accounts = await web3.eth.getAccounts()
 
-    console.log("accounts", accounts)
+    //checks if an account is connected
+    if (accounts.length === 0) {
+      alert("please connect a account")
+    }
     //get the user balance
     const userEthBalance = await web3.eth.getBalance(accounts[0])
 
@@ -80,6 +83,20 @@ const App = () => {
 
     setLoading(false)
   }
+
+  const buyTokens = (etherAmount) => {
+    setLoading(true)
+    ethSwapContract.methods
+      .buyTokens()
+      .send({
+        from: user.account,
+        value: etherAmount,
+      })
+      .on("transactionHash", (hash) => {
+        setLoading(false)
+        loadBlockchainData()
+      })
+  }
   return (
     <div>
       <Nav user={user} />
@@ -87,10 +104,15 @@ const App = () => {
         <div className="row">
           <main
             role="main"
-            className="col-lg-12 d-flex text-center justify-content-center"
+            className="col-lg-12 mr-auto text-center justify-content-center "
+            style={{ maxWidth: "600px" }}
           >
             <div className="content mr-auto ml-auto">
-              {loading ? <p className="text-center">Loading...</p> : <Main />}
+              {loading ? (
+                <p className="text-center">Loading...</p>
+              ) : (
+                <Main user={user} buyTokens={buyTokens} />
+              )}
             </div>
           </main>
         </div>

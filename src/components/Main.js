@@ -1,6 +1,12 @@
-import React from "react"
+import React, { useState } from "react"
+import Web3 from "web3"
+const Main = ({ user, buyTokens }) => {
+  //redeclare web3 object
+  const web3 = new Web3(Web3.givenProvider || "http://localhost:7545")
 
-const Main = () => {
+  const [etherAmount, setEtherAmount] = useState("0")
+  const [tokenAmount, setTokenAmount] = useState("0")
+
   return (
     <div id="content">
       <div className="card mb-4">
@@ -9,13 +15,17 @@ const Main = () => {
             className="mb-3"
             onSubmit={(event) => {
               event.preventDefault()
+              const convertedEther = web3.utils.toWei(etherAmount, "Ether")
+              buyTokens(convertedEther)
             }}
           >
             <div>
               <label className="float-left">
                 <b>Input</b>
               </label>
-              <span className="float-right text-muted">Balance: </span>
+              <span className="float-right text-muted">
+                Balance: {web3.utils.fromWei(user.balance, "ether")}{" "}
+              </span>
             </div>
             <div className="input-group mb-4">
               <input
@@ -23,6 +33,10 @@ const Main = () => {
                 className="form-control form-control-lg"
                 placeholder="0"
                 required
+                onChange={(e) => {
+                  setEtherAmount(e.target.value.toString())
+                  setTokenAmount((e.target.value * 100).toString())
+                }}
               />
               <div className="input-group-append">
                 <div className="input-group-text">
@@ -35,7 +49,9 @@ const Main = () => {
               <label className="float-left">
                 <b>Output</b>
               </label>
-              <span className="float-right text-muted">Balance: </span>
+              <span className="float-right text-muted">
+                Balance: {web3.utils.fromWei(user.tokenBalance, "ether")}{" "}
+              </span>
             </div>
             <div className="input-group mb-2">
               <input
@@ -43,6 +59,11 @@ const Main = () => {
                 className="form-control form-control-lg"
                 placeholder="0"
                 disabled
+                onChange={(e) => {
+                  setTokenAmount(e.target.value.toString())
+                  setEtherAmount(e.target.value.toString() / 100)
+                }}
+                value={tokenAmount}
               />
               <div className="input-group-append">
                 <div className="input-group-text">
